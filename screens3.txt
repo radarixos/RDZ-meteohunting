@@ -1,4 +1,5 @@
 ## screens3.txt: TFT display (portrait)
+## EDIT in your receiver:http://rdzsonde.local/edit.html?file=screens3.txt
 ## based on http://www.p1337.synology.me/dokuwiki/doku.php?id=public:wettersonden
 # Definition of display content and action behaviour
 #
