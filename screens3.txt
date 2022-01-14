@@ -1,0 +1,288 @@
+## screens3.txt: TFT display (portrait)
+## based on http://www.p1337.synology.me/dokuwiki/doku.php?id=public:wettersonden
+# Definition of display content and action behaviour
+#
+# Timer: (view timer, rx timer, norx timer)
+# - value -1: timer is disabled; value>=0: timer fires after (value) seconds
+# - view timer: time since current view (display mode and sonde) was started
+# - rx timer: time since when sonde data has been received continuously (trigger immediatly after RX)
+# - norx timer: time since when no sonde data has been received continuously
+#   (rx and norx timer is started after tuning a new frequency and receiving a signal or not receiving
+#    anything for a 1s period)
+# 
+# Actions:
+# - W: activate WiFi scan
+# - F: activate frequency spectrum display
+# - 0: activate "Scan:" display (this is basically just display mode 0)
+# - x: (1..N): activate display mode x [deprecated]
+# - >: activate next display mode 
+# - D: activate default receiver display (display mode specified in config)
+# - +: advance to next active sonde from QRG config
+# - #: no action
+#
+# Display content (lower/upper case: small/large font)
+#    line,column=content
+# for ILI9225 its also possible to indicate
+#    line,column,width=content          for text within a box of width 'width'
+#    line,column,-width=content         for right-justified text
+#
+# XText : Text
+# F(suffix): frequency (with suffix, e.g., " MHz")
+# L latitade
+# O lOngitute
+# A altitude
+# Hm(suffix) hor. speed m/s (suffix: e.g. "m/s"; no suffix=>m/s as 16x8 bitmap for SSD1306 display only)
+# Hk(suffix) hor. speed km/h (suffix: e.g. "km/h"; no suffix=>km/h as 16x8 bitmap for SSD1306 display only)
+# V(suffix) vert. speef (suffix: e.g. "m/s"; no suffix=>m/s  as 16x8 bitmap for SSD1306 display only)
+# Ix sonde ID (default/d: dxlaprs; s: short id, n: real serial number)
+#    RS41,RS92: all identical R1234567
+#    DFMx: ID M12345678; short ID and serial 12345678
+#    M10: ID ME95231F0; short ID: M95231F0; serial 9062104592
+# Q signal quality statistics bar
+# T type string (RS41/DFM9/DFM6/RS92)
+# C afC value
+# N ip address (only tiny font)
+# S scan list entry info:  l/empty: launch site name, #=entry nr, t=total entries, a=active entries, /: #/t  
+# K RS41 kill timer values: Kl launch timer, Kb burst timer, Kc kill countdown
+#   format: K_4: h:mm k_6: h:mm:ss k_s: sssss,  nothing shown for other sonde
+# Mx telemetry value x (t temp p preassure h hyg) [not yet implemented, maybe some day in future]
+# Gx  GPS-related data
+#     raw data from GPS:  GA, GO, GH, GC: LAtitude, lOngitude, Altutide(Height), Course over ground
+#     relative to sonde:  GD, GI, GB: Distance, dIrection (absolute), relative Bearing
+# G0  GPS circle diagram e.g.  3,5=g0NCS,50,ff0000,000033,5,ffff00,4,ffffff
+#     "N" (what is on top: N=north C=course)
+#     "C" (where does the arrow point to: C=course, S=sonde)
+#     "S" (what is shown by the bullet: C=course, S=sonde)
+#     50: circle radius, followed by fg and bg color
+#     5: bullet radius, followed by fg color
+#     4: arrow width, followed by fg color
+# R RSSI
+# B battery(T-Beam 1.0) S=status V=Batt.Volt C=charge current D=discharge current
+#                       U=USB volt I=USB current  T=IC temp
+#
+# fonts=x,y can be used to select font (x=small, y=large) for all items below
+# for SSD1306, x and y can be used to select one of those fonts:
+# (y should be a 1x2 font (1,5,6,7), x a small font)
+#                u8x8_font_chroma48medium8_r,        // 0 ** default small
+#                u8x8_font_7x14_1x2_f,               // 1 ** default large
+#                u8x8_font_amstrad_cpc_extended_f,   // 2
+#                u8x8_font_5x7_f,                    // 3
+#                u8x8_font_5x8_f,                    // 4
+#                u8x8_font_8x13_1x2_f,               // 5
+#                u8x8_font_8x13B_1x2_f,              // 6
+#                u8x8_font_7x14B_1x2_f,              // 7
+#                u8x8_font_artossans8_r,             // 8
+#                u8x8_font_artosserif8_r,            // 9
+#                u8x8_font_torussansbold8_r,         // 10 
+#                u8x8_font_victoriabold8_r,          // 11
+#                u8x8_font_victoriamedium8_r,        // 12
+#                u8x8_font_pressstart2p_f,           // 13
+#                u8x8_font_pcsenior_f,               // 14
+#                u8x8_font_pxplusibmcgathin_f,       // 15
+#                u8x8_font_pxplusibmcga_f,           // 16
+#                u8x8_font_pxplustandynewtv_f,       // 17
+#
+# for ILI9225, these fonts are available:
+# 	Terminal6x8		// 0
+#       Terminal11x16		// 1
+#       Terminal12x16		// 2
+#	FreeMono9pt7b,          // 3
+#       FreeMono12pt7b,         // 4
+#       FreeSans9pt7b,          // 5
+#       FreeSans12pt7b,         // 6
+#       Picopixel,  		// 7
+#
+# color=rrggbb,rrggbb  can be used to select color (foreground, background)
+# see https://github.com/Nkawu/TFT_22_ILI9225/wiki#color-reference for example (use without "#"-sign)
+#
+# for TFT display, coordinates and width are multiplied by xscale,yscale and later used in pixels
+# with scale=1,1 you can directly use pixel coordinates.  (default: xscale=13,yscale=22 => 8 lines, 16 columns)
+
+############
+@Scan
+timer=-1,0,0
+key1action=D,#,F,W
+key2action=D,#,#,#
+timeaction=#,D,+
+scale=11,10
+fonts=0,1
+color=00ff00
+0,0=x-----------------------------
+color=ffff00
+1,4=xSCANNING...
+color=00ff00
+2,0=x-----------------------------
+color=00ff00
+3,11=xINDEX
+4,11,8=s/
+3,0=xSITE
+4,0=s
+6,11=xMODE
+7,11,6=t
+6,0=xFREQ
+7,0=f MHz
+9,0=x-----------------------------
+10,0=xHOST IP:
+10,6=n
+color=6C757D
+15,0=xScan Mode
+16,0=bVV
+color=FF0000
+19,14=xOK1VBR
+color=00ff00
+
+#############
+@Telemetry
+timer=-1,-1,N
+key1action=+,0,F,W
+key2action=>,#,#,#
+timeaction=#,#,#
+fonts=0,1
+color=ffff00
+0,0=xID:
+color=00ff00
+0,2=in
+color=ffff00
+0,8=xSITE:
+color=00ff00
+0,11=s
+1,0=x-----------------------------
+color=ffff00
+2,0=xRADIO:
+color=00FF00
+2,5=f MHz
+3,0=xRSSI:
+3,5=r
+4,0=xLINK:
+4,5=Q
+5,0=xMODE:
+5,5=t
+6,0=x-----------------------------
+color=ffff00
+7,0=xSONDE WX TELEMETRY:
+color=00FF00
+8,0=xALT(GPS):
+8,8=a
+9,0=xTEMP:
+9,8=mt°C
+10,0=xHUMIDITY:
+10,8=mh%rH
+11,0=xPRESSURE:
+11,8=mphPa
+12,0=xBATTERY:
+12,8=mbV
+13,0=x-----------------------------
+color=ffff00
+14,0=xSONDE GPS
+14,11=xHunter:
+color=00FF00
+15,0=xLAT:
+15,3=l
+15,11=xDIST:
+15,14=gD
+16,0=xLON:
+16,3=o
+16,11=xDIR:
+16,13=gB
+17,0=xSPEED:
+17,5=hk km/h
+17,11=xAKU:
+17,13=bS
+17,14=bVV
+18,0=xVARIO:
+18,5=v m/s
+19,0=xHEADING:
+19,6=gC
+color=FF0000
+19,14=xOK1VBR
+color=00ff00
+
+############
+@GPSdata
+timer=-1,-1,-1
+key1action=+,0,F,W
+key2action=>,#,#,#
+timeaction=#,#,#
+fonts=0,1
+color=00ff00
+0,0=x-----------------------------
+color=ffff00
+1,2=xRECEIVER GPS STATUS:
+color=00ff00
+2,0=x-----------------------------
+color=00ff00
+3,0=xLAT:
+3,5=gA
+4,0=xLON:
+4,5=gO
+5,0=xALT:
+5,5=gH
+6,0=xCRS:
+6,5=gC
+7,0=x-----------------------------
+8,0=xDistance to sonde:
+8,13=gD
+9,0=xDirection (absolute):
+9,13=gI
+10,0=xBearing (relative)
+10,13=gB
+11,0=x-----------------------------
+color=ffff00
+12,2=xSONDE GPS STATUS:
+color=00ff00
+13,0=x-----------------------------
+14,0=xLAT:
+14,5=l
+15,0=xLON:
+15,5=o
+16,0=xALT:
+16,5=a
+17,0=xGS:
+17,5=hkkm/h
+18,0=xVARIO:
+18,5=vm/s
+19,0=xLAUNCH TIMER:
+19,8=kl6
+color=FF0000
+19,14=xOK1VBR
+color=00ff00
+
+############
+@Battery
+timer=-1,-1,N
+key1action=+,0,F,W
+key2action=>,#,#,#
+timeaction=#,#,#
+fonts=0,1
+color=00ff00
+0,0=x-----------------------------
+color=ffff00
+1,2=xPOWER SUPPLY STATUS:
+color=00ff00
+2,0=x-----------------------------
+color=00ff00
+3,0=xAKU
+4,0=xUb:
+4,3=bVV
+4,8=bS
+5,0=xIb:
+5,3=bDmA (discharging)
+6,3=bCmA (charging)
+7,0=xTEMP:
+7,3=bT C
+8,0=x-----------------------------
+9,0=xUSB
+10,0=xUu:
+10,3=bUV
+11,0=xIu:
+11,3=bImA
+12,0=x-----------------------------
+color=ffff00
+13,0=xSONDE POWER SUPPLY
+color=00ff00
+14,0=xonBoard BAT:
+14,10=mbV
+16,0=x-----------------------------
+color=FF0000
+19,14=xOK1VBR
+color=00ff00
